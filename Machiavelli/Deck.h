@@ -18,6 +18,7 @@ public:
 	size_t	GetDeckSize() { return deck.size(); }
 	void	ClearDeck() { deck.clear(); }
 	vector<shared_ptr<T>> GetDeck() { return deck; }
+	shared_ptr<T> GetLast() { auto t = deck.back(); RemoveCard(t); return t; }
 
 private:
 	vector<shared_ptr<T>> deck;

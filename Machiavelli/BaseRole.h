@@ -1,6 +1,9 @@
 #pragma once
 #include <string>
 #include <memory>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 
 enum Role {R_MURDERER, R_THIEF, R_MAGIC, R_KING, R_PRIEST, R_TRADER, R_BUILDER, R_CONDOTTIERE };
 
@@ -21,10 +24,16 @@ public:
 	Role getRole() { return role; }
 	int getResponse(Game g, int extraOptions);
 	bool handleBuild(Game g, int userInput);
+	virtual void reset();
 protected:
 	void print(Game g);
+	int buildCount = 1;
+	int buildingLimit = 8;
 private:
+	void getCards(Game g);
 	string name;
 	Role role;
+	
+
 };
 

@@ -7,6 +7,7 @@ public:
 	Murderer();
 	~Murderer();
 	void execute(Game g) override;
+	bool handleKilling(Game g);
 
 };
 

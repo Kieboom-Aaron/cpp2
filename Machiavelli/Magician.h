@@ -8,5 +8,7 @@ public:
 	Magician();
 	~Magician();
 	void execute(Game g) override;
+private:
+	void handleRemove(Game g, int amount);
 };
 

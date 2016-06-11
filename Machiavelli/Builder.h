@@ -7,5 +7,6 @@ public:
 	Builder();
 	~Builder();
 	void execute(Game g) override;
+	void reset() override;
 };
 

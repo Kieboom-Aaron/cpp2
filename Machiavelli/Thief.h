@@ -6,5 +6,6 @@ public:
 	Thief();
 	~Thief();
 	void execute(Game g) override;
+	bool handleRobery(Game g);
 };
 

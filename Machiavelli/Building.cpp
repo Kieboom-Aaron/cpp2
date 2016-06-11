@@ -2,7 +2,7 @@
 
 
 
-Building::Building(string name, int costs):name{name}, costs{costs}
+Building::Building(string name, int costs, BuildingColor b):name{name}, costs{costs}, color{b}
 {
 	
 }

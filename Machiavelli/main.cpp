@@ -20,6 +20,8 @@ using namespace std;
 #include "Player.h"
 #include "Game.h"
 
+#include <vld.h>
+
 namespace machiavelli {
     const int tcp_port {1080};
     const string prompt {"machiavelli> "};
@@ -82,8 +84,7 @@ void handle_client(shared_ptr<Socket> client) // this function runs in a separat
 					std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::tolower);
 
 					if (cmd == "quit") {
-						//m_g->RemovePlayer(player);
-						//m_g->handleCommand(player, "quit");
+						game->removePlayer(player);
 						client->write("Bye!\r\n");
 						break; // out of game loop, will end this thread and close connection
 					}

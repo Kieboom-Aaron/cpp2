@@ -3,17 +3,16 @@
 #include "Murderer.h"
 #include "Thief.h"
 #include "King.h"
+#include "Builder.h"
+#include "Condottiere.h"
+#include "Priest.h"
+#include "Magician.h"
+#include "Trader.h"
 #include <thread>
 
 Game::Game()
 {
-	roles.push_back(make_shared<Murderer>(Murderer()));
-	roles.push_back(make_shared<Thief>(Thief()));
-	roles.push_back(make_shared<King>(King()));
-	buildings.push_back(shared_ptr<Building>(new Building{ "Buildin1", 1 }));
-	buildings.push_back(make_shared<Building>(Building("Buildin2", 2)));
-	buildings.push_back(make_shared<Building>(Building("Buildin3", 3)));
-	buildings.push_back(make_shared<Building>(Building("Buildin4", 4)));
+	
 }
 
 
@@ -49,14 +48,24 @@ void Game::removePlayer(std::shared_ptr<Player> p) {
 			players.erase(players.begin() + i);
 		}
 	}
+	writeToAll(p->get_name() + " heeft het spel verlaten. Er zijn niet genoeg spelers om verder te spelen \r\n");
+}
+
+shared_ptr<Building> Game::getLastBuilding() {
+	return buildings.GetLast();
 }
 
 void Game::start() {
+	readCSV("../Resources/bouwkaarten.csv", T_BUILDINGS);
+	readCSV("../Resources/karakterkaarten.csv", T_ROLES);
+	buildings.ShuffleDeck();
 	writeToAll("Het spel is gestart \r\n");
 	for (auto player : players) {
 		player->addCoins(2);
-		player->addHandBuilding(buildings.at(0));
-		buildings.erase(buildings.begin());
+		player->addHandBuilding(buildings.GetLast());
+		player->addHandBuilding(buildings.GetLast());
+		player->addHandBuilding(buildings.GetLast());
+		player->addHandBuilding(buildings.GetLast());
 	}
 
 	//TODO add buildings
@@ -72,8 +81,7 @@ void Game::resetDeck() {
 	}
 
 	for (auto r : roles) {
-		r->stolen = false;
-		r->alive = true;
+		r->reset();
 		rolesDeck.AddCard(r);
 	}
 	rolesDeck.ShuffleDeck();
@@ -109,13 +117,13 @@ void Game::round() {
 
 	resetDeck();
 
-	writeToAll("Er is een nieuwe ronden gestart, "+kingsName + " is nu aan de beurt om een rol te kiezen");
+	writeToAll("Er is een nieuwe ronden gestart, "+kingsName + " is nu aan de beurt om een rol te kiezen \n\r");
 	chooseRoles();
 	writeToAll("alle rollen zijn verdeeld, we kunnen starten");
 	
 	playRound();
 
-
+	checkVictory();
 }
 
 void Game::writeToAll(string text) {
@@ -143,6 +151,7 @@ void Game::nextPlayer()
 			index = count + 1;
 			break;
 		}
+		count++;
 	}
 	currentPlayer->getClient()->write("Je beurt is voorbij, je zut even moeten wachten\r");
 	currentPlayer = players.at(index);
@@ -231,5 +240,105 @@ void Game::playRound()
 			roles.at(currentRole)->execute(*this);
 		}
 		currentRole++;
+	}
+}
+
+void Game::checkVictory() {
+	bool vic = false;
+	for (auto p : players) {
+		if (p->firstToEight) {
+			vic = true;
+		}
+	}
+	if (vic) {
+		string	name = "";
+		int		points = 0;
+
+		for (auto p : players) {
+			if (points < p->getPoints()) {
+				points = p->getPoints();
+				name = p->get_name();
+			}
+			p->getClient()->write("Je hebt:" + std::to_string(p->getPoints()) + " punten!  \r\n");
+		}
+
+		writeToAll(name + " heeft gewonnen met " + std::to_string(points) + " punten!  \r\n");
+	}
+	else {
+		round();
+	}
+}
+
+BuildingColor Game::parseColor(string t) {
+	if (t == "geel") 
+		return B_ORANGE;
+	if (t == "blauw")
+		return B_BLUE;
+	if (t == "rood")
+		return B_RED;
+	if (t == "groen")
+		return B_GREEN;
+	if (t == "lila")
+		return B_PURPLE;
+}
+
+shared_ptr<BaseRole> Game::parseRole(string t) {
+
+	if(t == "Moordenaar")
+		return make_shared<Murderer>(Murderer());
+	if(t == "Dief")
+		return make_shared<Thief>(Thief());
+	if( t== "Magiër")
+		return make_shared<Magician>(Magician());
+	if( t == "Koning")
+		return make_shared<King>(King());
+	if (t == "Prediker")
+		return make_shared<Priest>(Priest());
+	if (t == "Koopman")
+		return make_shared<Trader>(Trader());
+	if (t == "Bouwmeester")
+		return make_shared<Builder>(Builder());
+	if (t == "Condottiere")
+		return make_shared<Condottiere>(Condottiere());
+
+}
+
+
+
+void Game::readCSV(string path, FileType type) {
+
+	ifstream infile(path);
+
+	while (infile)
+	{
+		string s;
+		if (!getline(infile, s)) break;
+
+		istringstream ss(s);
+
+		while (ss)
+		{
+			string s;
+			if (!getline(ss, s, ',')) break;
+
+
+			vector <string> record;
+			stringstream ss(s);
+			string item;
+			while (std::getline(ss, item, ';')) {
+				record.push_back(item);
+			}
+
+			if (type == T_BUILDINGS) {
+				buildings.AddCard(make_shared<Building>(Building(record.at(0), atoi(record.at(1).c_str()), parseColor(record.at(2)))));
+			}
+			else {
+				roles.push_back(parseRole(record.at(1)));
+			}
+		}
+	}
+	if (!infile.eof())
+	{
+		cerr << "Fooey!\n";
 	}
 }

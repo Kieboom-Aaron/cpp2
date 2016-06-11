@@ -37,6 +37,7 @@ public:
 	void addRole(shared_ptr<BaseRole> role) { roles.push_back(role); }
 	bool isKing = false;
 	bool wasKing = false;
+	bool firstToEight = false;
 	bool canPlay(Role r);
 	void setResponse(string r) { response = r; }
 	string getResponse() { while (response == "") { } string text = response; response = "";return text; }
@@ -47,12 +48,16 @@ public:
 	vector<shared_ptr<Building>> getTableBuildings() { return buildingsTable; }
 	void addHandBuilding(shared_ptr<Building> b) { buildingsHand.push_back(b); }
 	void addTableBuilding(shared_ptr<Building> b) { buildingsTable.push_back(b); }
-	shared_ptr<Building> removeHandBuilding(int index) { buildingsHand.erase(buildingsHand.begin() + index); }
-	shared_ptr<Building> removeTableBuilding(int index) { buildingsTable.erase(buildingsTable.begin() + index); }
+	void removeHandBuilding(int index) { buildingsHand.erase(buildingsHand.begin() + index); }
+	void removeTableBuilding(int index) { buildingsTable.erase(buildingsTable.begin() + index); }
 	//coins
 	void addCoins(int amount) { coins += amount; }
 	void removeCoins(int amount) { coins -= amount; if (coins < 0) { coins = 0; } }
 	int getCoins() { return coins; }
+	int getPoints();
+	bool hasRole(Role r);
+	void getCoinsForBuildings(BuildingColor c);
+	void setHandBuildings(vector<shared_ptr<Building>> b) { buildingsHand = b; }
 private:
 	// Player information
 	std::string name;
@@ -63,6 +68,7 @@ private:
 	const shared_ptr<Socket> client;
 	vector<shared_ptr<BaseRole>>roles;
 	vector<shared_ptr<Building>>buildingsHand, buildingsTable;
+	bool hasBuilidingWithColor(BuildingColor c);
 
 };
 
