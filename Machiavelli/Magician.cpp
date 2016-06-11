@@ -18,10 +18,10 @@ void Magician::handleRemove(Game g, int amount) {
 		message += "machiavelli>";
 		g.getCurrentPlayer()->getClient()->write(message);
 		int userInput = getResponse(g, c - 1);
-		g.getCurrentPlayer()->getHandBuildings().erase(g.getCurrentPlayer()->getHandBuildings().begin() + userInput);
+		g.getCurrentPlayer()->removeHandBuilding(userInput);
 	}
 	for (int i = 0; i < amount; i++) {
-		g.getCurrentPlayer()->getHandBuildings().push_back(g.getLastBuilding());
+		g.getCurrentPlayer()->addHandBuilding(g.getLastBuilding());
 	}
 	g.getCurrentPlayer()->getClient()->write("De gebouwen zijn gewisseld \n\r");
 }
@@ -62,7 +62,7 @@ void Magician::execute(Game g) {
 					if (amount > 0) {
 						done = true;
 					}
-					handleRemove(amount);
+					handleRemove(g, amount);
 				}
 			}
 		}
